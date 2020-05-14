@@ -1,0 +1,30 @@
+<html>
+
+  <head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Test HTML</title>
+
+  </head>
+
+  <body id="body" invisible>
+
+    <script type="module">
+      import { CCCTestElement } from './test_element.js';
+
+      window.addEventListener('DOMContentLoaded', (event) => {
+        let body = document.getElementById("body");
+        body.removeAttribute('invisible');
+      });
+   </script>
+
+   <ccc-test-element class="no-children"></ccc-test-element>
+   <ccc-test-element class="manages-children"><ccc-test-element class="managed-child"></ccc-test-element></ccc-test-element>
+   <ccc-test-element class="consumes-children"><ccc-test-element class="consumed-child" embedded></ccc-test-element></ccc-test-element>
+   <ccc-test-element class="consumes-children-2x"><ccc-test-element class="consumes-children" embedded><ccc-test-element class="consumed-child" embedded></ccc-test-element></ccc-test-element></ccc-test-element>
+   <ccc-test-element class="consumes-children-3x"><ccc-test-element class="consumes-children-2x" embedded><ccc-test-element class="consumes-children" embedded><ccc-test-element class="consumed-child" embedded></ccc-test-element></ccc-test-element></ccc-test-element></ccc-test-element>
+
+  </body>
+
+</html>
