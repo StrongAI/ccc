@@ -1,5 +1,6 @@
 
 import { LitElement, html } from '../../lit-element/lit-element.js';
+import { render } from '../../lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 import { CCCEmbeddableElementMixin } from './ccc-embeddable-element-mixin.js';
 
@@ -8,14 +9,6 @@ class CCCElement extends mix(LitElement).with(CCCEmbeddableElementMixin) {
   /***************
   *  Properties  *
   ***************/
-
-  static get properties () {
-    return {
-      embedded: {
-        type:  Boolean
-      }
-    };
-  }
 
   static get tagName()  {
     throw "Subclass of CCCElement expected to define static get tagName().";
@@ -99,28 +92,35 @@ class CCCElement extends mix(LitElement).with(CCCEmbeddableElementMixin) {
     return this.constructor.isNumbered;
   }
 
-  get number() {
+  static get unnumberedValue() {
+    return 'unnumbered';
+  }
+
+  get unnumberedValue() {
+    return this.constructor.unnumberedValue;
+  }
+
+  calculateNumber( increment_condition = ( accumulator, this_element ) =>
+                                         { return this_element.isNumbered; } ) {
     if ( this.isNumbered ) {
       if ( this._number == undefined ) {
         this._number = 0;
         let this_element = this;
-        do { this._number += this_element.isNumbered ? 1 : 0; }
+        do { this._number += increment_condition( this._number, this_element ) ? 1 : 0; }
         while (this_element = this_element.previousElementSibling);
       }
       return this._number;
     }
-    else return undefined;
+    else return this.unnumberedValue;
+  }
+
+  get number() {
+    return this.calculateNumber();
   }
 
   /*************
   *  Template  *
   *************/
-
-  templatedSlot() {
-    if ( ! this._templatedSlot )
-      this._templatedSlot = html`<div class="embedded-elements default"></div><slot class="default" @slotchange="${this.slotDidChange}"></slot>`;
-    return this._templatedSlot;
-  }
 
   templatedDefaultStylesheets() {
     if ( ! this._templatedDefaultStylesheets )
@@ -153,5 +153,5 @@ ${this.templatedElementStylesheets()}`;
 }
 
 export { CCCElement,
-         LitElement, html,
+         LitElement, html, render,
          Mixin, mix }

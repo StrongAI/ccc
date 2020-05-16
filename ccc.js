@@ -1,2 +1,2 @@
 
-export { CCCElement, LitElement, html } from './component/ccc-element.js';
+export { CCCElement, LitElement, html, render } from './component/ccc-element.js';
