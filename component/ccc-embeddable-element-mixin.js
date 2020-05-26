@@ -34,7 +34,6 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
     super();
     this.embedded = false;
     this.unshadowed = false;
-    this.addEventListener( 'did_assign_node', this.didAssignNode );
   }
 
   connectedCallback() {
@@ -60,17 +59,24 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
     this._unshadowParentElement = parent_element;
   }
 
-  get hasMigratedEmbeddedElements() {
-    return this._hasMigratedEmbeddedElements;
-  }
-
   /*********
   *  Slot  *
   *********/
 
-  firstUnshadowed() {
-    let did_unshadow = new CustomEvent('unshadowed' );
-    this.dispatchEvent( did_unshadow );
+  shouldConsume( node ) {
+    return ( this.consume || this.embedded || node.embedded ) && ! node._hasBeenUnshadowed;
+  }
+
+  migrateNewConsumableNodes( slot, nodes = { /* index: node */ } ) {
+    this.unshadowParentElement;
+    super.migrateNewConsumableNodes( slot, nodes );
+    if ( this.embedded )
+      this.unshadow();
+  }
+
+  dispatchDidUnshadowEvent() {
+    let did_unshadow_event = new CustomEvent('did_unshadow' );
+    this.dispatchEvent( did_unshadow_event );
   }
 
   unshadow() {
@@ -82,33 +88,8 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
       this.moveShadowChildrenToLight();
       this.restoreSlots( slots );
       this.unshadowed = true;
-
-      this.firstUnshadowed();
+      this.dispatchDidUnshadowEvent();
     }
-  }
-
-  migrateEmbeddedElements( slot ) {
-    /*
-        Anything matching ::slotted([embedded]) is moved from lightDOM
-        into shadowDOM.
-    */
-    slot.removeEventListener( 'slotchange', this.onslotchange );
-    this._hasMigratedEmbeddedElements = true;
-    this.unshadowParentElement;
-    let assigned_nodes = slot.assignedNodes();
-    let assigned_node_count = assigned_nodes.length;
-    for ( let index = 0 ; index < assigned_node_count ; ++index ) {
-      let this_node = assigned_nodes[index];
-      if ( this.embedded || this_node.embedded ) {
-        // if ( this_node._hasMigratedAsEmbeddedElement !== undefined ) {
-          slot.parentNode.insertBefore( this_node, slot );
-          this_node._hasMigratedAsEmbeddedElement = true;
-        // }
-      }
-    }
-    if ( this.embedded )
-      this.unshadow();
-    slot.addEventListener( 'slotchange', this.onslotchange );
   }
 
   preserveSlots() {
@@ -128,6 +109,7 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
     for ( let index = 0 ; index < child_node_count ; ++index ) {
       let this_child = this.shadowRoot.childNodes[0];
       this.appendChild( this_child );
+      this_child._hasBeenUnshadowed = true;
     }
   }
 

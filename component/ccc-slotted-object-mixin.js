@@ -38,10 +38,14 @@ let CCCSlottedObjectMixin = Mixin( (superclass) => class extends superclass {
     let assigned_nodes = slot.assignedNodes();
     if ( slot.assignedNodeTrace === undefined        ||
          slot.assignedNodeTrace.length === undefined ||
-         assigned_nodes.length > slot.assignedNodeTrace.length )
-      this.dispatchDidAssignEvent( slot, this.filterAddedNodes( slot ) );
-    else
-      this.dispatchDidRemoveEvent( slot, this.filterRemovedNodes( slot ) );
+         assigned_nodes.length > slot.assignedNodeTrace.length ) {
+      let added_nodes = this.filterAddedNodes( slot );
+      this.dispatchDidAssignEvent( slot, added_nodes );
+    }
+    else {
+      let removed_nodes = this.filterRemovedNodes( slot );
+      this.dispatchDidRemoveEvent( slot, removed_nodes );
+    }
     slot.assignedNodeTrace = assigned_nodes;
   }
 
@@ -49,7 +53,7 @@ let CCCSlottedObjectMixin = Mixin( (superclass) => class extends superclass {
     let assigned_nodes = slot.assignedNodes();
     let added_nodes = {};
     for ( let index = 0; index < assigned_nodes.length ; ++index ) {
-      if ( slot.assignedNodeTrace &&
+      if ( slot.assignedNodeTrace === undefined ||
            assigned_nodes[ index ] !== slot.assignedNodeTrace[ index ] )
         added_nodes[ index ] = assigned_nodes[ index ];
     }
@@ -76,7 +80,8 @@ let CCCSlottedObjectMixin = Mixin( (superclass) => class extends superclass {
 
   dispatchDidAssignEvent( slot, detail = { /* index: node */ } ) {
     this.dispatchDidAssignNodeEvent( slot, detail );
-    this.dispatchDidAssignElementEvent( slot, this.filterElements( detail ) );
+    let elements = this.filterElements( detail );
+    this.dispatchDidAssignElementEvent( slot, elements );
   }
 
   dispatchDidAssignNodeEvent( slot, node_detail = { /* index: node */ } ) {
@@ -97,7 +102,8 @@ let CCCSlottedObjectMixin = Mixin( (superclass) => class extends superclass {
 
   dispatchDidRemoveEvent( slot, detail = { /* index: node */ } ) {
     this.dispatchDidRemoveNodeEvent( slot, detail );
-    this.dispatchDidRemoveElementEvent( slot, this.filterElements( detail ) );
+    let elements = this.filterElements( detail );
+    this.dispatchDidRemoveElementEvent( slot, elements );
   }
 
   dispatchDidRemoveNodeEvent( slot, node_detail = { /* index: node */ } ) {
