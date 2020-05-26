@@ -1,8 +1,15 @@
 
 import { LitElement, html } from '../../lit-element/lit-element.js';
 import { Mixin, mix } from "../src/mixwith.js";
+import { CCCObjectConsumerMixin } from './ccc-object-consumer-mixin.js';
+import { CCCSlottedObjectMixin } from './ccc-slotted-object-mixin.js';
 
-let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass {
+const STATE_HAS_UPDATED = 1;
+const STATE_UPDATE_REQUESTED = 1 << 2;
+const STATE_IS_REFLECTING_TO_ATTRIBUTE = 1 << 3;
+const STATE_IS_REFLECTING_TO_PROPERTY = 1 << 4;
+
+let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCObjectConsumerMixin, CCCSlottedObjectMixin) {
 
   /***************
   *  Properties  *
@@ -19,13 +26,6 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass 
     };
   }
 
-  attributeChangedCallback(name, old_value, new_value) {
-    if ( this.constructor.getPropertyOptions(name).type === Boolean && new_value == '')
-      new_value = true;
-    this[name] = new_value;
-    this.requestUpdate( name, old_value );
-  }
-
   /*****************
   *  Constructors  *
   *****************/
@@ -34,6 +34,7 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass 
     super();
     this.embedded = false;
     this.unshadowed = false;
+    this.addEventListener( 'did_assign_node', this.didAssignNode );
   }
 
   connectedCallback() {
@@ -49,8 +50,9 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass 
   *************/
 
   get unshadowParentElement() {
-    if ( ! this._unshadowParentElement )
+    if ( ! this._unshadowParentElement ) {
       this._unshadowParentElement = this.parentElement;
+    }
     return this._unshadowParentElement;
   }
 
@@ -66,10 +68,9 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass 
   *  Slot  *
   *********/
 
-  slotDidChange( event ) {
-    let slot = event.target;
-    if ( ! this.hasMigratedEmbeddedElements )
-      this.migrateEmbeddedElements( slot );
+  firstUnshadowed() {
+    let did_unshadow = new CustomEvent('unshadowed' );
+    this.dispatchEvent( did_unshadow );
   }
 
   unshadow() {
@@ -81,6 +82,8 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass 
       this.moveShadowChildrenToLight();
       this.restoreSlots( slots );
       this.unshadowed = true;
+
+      this.firstUnshadowed();
     }
   }
 
@@ -97,8 +100,10 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass 
     for ( let index = 0 ; index < assigned_node_count ; ++index ) {
       let this_node = assigned_nodes[index];
       if ( this.embedded || this_node.embedded ) {
-        let this_container = this.embeddedElementsContainer( slot.classList );
-        this_container.appendChild( this_node );
+        // if ( this_node._hasMigratedAsEmbeddedElement !== undefined ) {
+          slot.parentNode.insertBefore( this_node, slot );
+          this_node._hasMigratedAsEmbeddedElement = true;
+        // }
       }
     }
     if ( this.embedded )
@@ -132,36 +137,6 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends superclass 
       let this_slot = temp_div.firstChild;
       this.shadowRoot.appendChild( this_slot );
     }
-  }
-
-  get embeddedElementsContainers() {
-    if ( ! this._embeddedElementsContainer )
-      this._embeddedElementsContainer = {};
-    return this._embeddedElementsContainer;
-  }
-
-  embeddedElementsContainer( slot_class_list ) {
-    let class_string = [ '.embedded-elements' ].concat( slot_class_list ).join('.');
-    let container = this.embeddedElementsContainers[ class_string ];
-    if ( ! container ) {
-      if ( ! ( container = this.shadowRoot.querySelector(class_string) ) )
-        container = this.querySelector(class_string);
-      this.embeddedElementsContainers[ class_string ] = container
-    }
-
-    return container;
-  }
-
-  /*************
-  *  Template  *
-  *************/
-
-  templatedSlot() {
-    if ( ! this._templatedSlot ) {
-      this.onslotchange = (event) => { this.slotDidChange(event); };
-      this._templatedSlot = html`<div class="embedded-elements default"></div><slot class="default" @slotchange="${this.onslotchange}"></slot>`;
-    }
-    return this._templatedSlot;
   }
 
 });

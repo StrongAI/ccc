@@ -45,7 +45,6 @@ export const Cached = (mixin) => wrap(mixin, (superclass) => {
 
 /**
  * Adds @@hasInstance (ES2015 instanceof support) to mixin.
- * Note: @@hasInstance is not supported in any browsers yet.
  */
 export const HasInstance = (mixin) => {
   if (Symbol.hasInstance && !mixin.hasOwnProperty(Symbol.hasInstance)) {
@@ -67,7 +66,7 @@ export const HasInstance = (mixin) => {
 
 /**
  * A basic mixin decorator that sets up a reference from mixin applications
- * to the mixin defintion for use by other mixin decorators.
+ * to the mixin definition for use by other mixin decorators.
  */
 export const BareMixin = (mixin) => wrap(mixin, (superclass) => {
   // Apply the mixin

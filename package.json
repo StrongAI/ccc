@@ -4,9 +4,9 @@
   "description": "Composable Computing Components",
   "main": "ccc.js",
   "scripts": {
-    "test": "testcafe chrome:headless test/ccc-element.test.js",
+    "test": "testcafe chrome:headless test/ccc-slotted-object.test.js",
     "livetest": "testcafe chrome",
-    "debug": "testcafe chrome test/ccc-element.test.js --debug-mode"
+    "debug": "testcafe chrome test/ccc-slotted-object.test.js --debug-mode"
   },
   "repository": {
     "type": "git",
