@@ -1,9 +1,9 @@
 
-import { CCCElement,
-         LitElement, html, render,
-         Mixin, mix } from './ccc-element.js';
+import { LitElement, html } from '../../lit-element/lit-element.js';
+import { render } from '../../lit-html/lit-html.js';
+import { Mixin, mix } from "../src/mixwith.js";
 
-let CCCSlottedObjectMixin = Mixin( (superclass) => class extends superclass {
+let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
 
   /***************
   *  Properties  *
@@ -134,7 +134,6 @@ let CCCSlottedObjectMixin = Mixin( (superclass) => class extends superclass {
 
 });
 
-export { CCCSlottedObjectMixin,
-         CCCElement,
+export { CCCSlotControllerMixin,
          LitElement, html, render,
          Mixin, mix }

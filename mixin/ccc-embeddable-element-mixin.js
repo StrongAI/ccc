@@ -1,15 +1,16 @@
 
 import { LitElement, html } from '../../lit-element/lit-element.js';
+import { render } from '../../lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
-import { CCCObjectConsumerMixin } from './ccc-object-consumer-mixin.js';
-import { CCCSlottedObjectMixin } from './ccc-slotted-object-mixin.js';
+import { CCCNodeConsumerMixin } from './ccc-node-consumer-mixin.js';
+import { CCCSlotControllerMixin } from './ccc-slot-controller-mixin.js';
 
 const STATE_HAS_UPDATED = 1;
 const STATE_UPDATE_REQUESTED = 1 << 2;
 const STATE_IS_REFLECTING_TO_ATTRIBUTE = 1 << 3;
 const STATE_IS_REFLECTING_TO_PROPERTY = 1 << 4;
 
-let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCObjectConsumerMixin, CCCSlottedObjectMixin) {
+let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCNodeConsumerMixin, CCCSlotControllerMixin) {
 
   /***************
   *  Properties  *
@@ -48,8 +49,16 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
   *  Unshadow  *
   *************/
 
+  get unshadowRoot() {
+    if ( this.unshadowed )
+      return this;
+    else
+      return this.shadowRoot;
+  }
+
   get unshadowParentElement() {
     if ( ! this._unshadowParentElement ) {
+      // if ( ! this.parentElement && ( ) )
       this._unshadowParentElement = this.parentElement;
     }
     return this._unshadowParentElement;
@@ -58,10 +67,6 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
   set unshadowParentElement( parent_element ) {
     this._unshadowParentElement = parent_element;
   }
-
-  /*********
-  *  Slot  *
-  *********/
 
   shouldConsume( node ) {
     return ( this.consume || this.embedded || node.embedded ) && ! node._hasBeenUnshadowed;
@@ -72,11 +77,6 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
     super.migrateNewConsumableNodes( slot, nodes );
     if ( this.embedded )
       this.unshadow();
-  }
-
-  dispatchDidUnshadowEvent() {
-    let did_unshadow_event = new CustomEvent('did_unshadow' );
-    this.dispatchEvent( did_unshadow_event );
   }
 
   unshadow() {
@@ -110,6 +110,7 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
       let this_child = this.shadowRoot.childNodes[0];
       this.appendChild( this_child );
       this_child._hasBeenUnshadowed = true;
+      this.dispatchDidUnshadowChildEvent( this_child );
     }
   }
 
@@ -119,6 +120,31 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
       let this_slot = temp_div.firstChild;
       this.shadowRoot.appendChild( this_slot );
     }
+  }
+
+  /***********
+  *  Events  *
+  ***********/
+
+  dispatchDidUnshadowEvent() {
+    let did_unshadow_event = new CustomEvent('did_unshadow' );
+    this.dispatchEvent( did_unshadow_event );
+  }
+
+  dispatchDidUnshadowChildEvent( node ) {
+    this.dispatchDidUnshadowChildNodeEvent( node );
+    if ( node.nodeType === Node.ELEMENT_NODE )
+      this.dispatchDidUnshadowChildElementEvent( node );
+  }
+
+  dispatchDidUnshadowChildNodeEvent( node ) {
+    let did_unshadow_child_node_event = new CustomEvent( 'did_unshadow_child_node', { detail: { node: node } } );
+    this.dispatchEvent( did_unshadow_child_node_event );
+  }
+
+  dispatchDidUnshadowChildElementEvent( element ) {
+    let did_unshadow_child_element_event = new CustomEvent( 'did_unshadow_child_element', { detail: { element: element } } );
+    this.dispatchEvent( did_unshadow_child_element_event );
   }
 
 });

@@ -1,7 +1,7 @@
 
-import { CCCElement,
-         LitElement, html, render,
-         Mixin, mix } from './ccc-element.js';
+import { LitElement, html } from '../../lit-element/lit-element.js';
+import { render } from '../../lit-html/lit-html.js';
+import { Mixin, mix } from "../src/mixwith.js";
 
 let CCCConsumableObjectMixin = Mixin( (superclass) => class extends superclass {
 

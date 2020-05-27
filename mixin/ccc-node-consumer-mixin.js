@@ -1,10 +1,13 @@
 
-import { CCCElement,
-         LitElement, html, render,
-         Mixin, mix } from './ccc-element.js';
-import { CCCSlottedObjectMixin } from './ccc-slotted-object-mixin.js';
+import { LitElement, html } from '../../lit-element/lit-element.js';
+import { render } from '../../lit-html/lit-html.js';
+import { Mixin, mix } from "../src/mixwith.js";
+import { CCCSlotControllerMixin } from '../mixin/ccc-slot-controller-mixin.js';
 
-let CCCObjectConsumerMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCSlottedObjectMixin) {
+/*
+  "Consume": to move any ::slotted(*) to insert before slot in shadow root.
+*/
+let CCCNodeConsumerMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCSlotControllerMixin) {
 
   /***************
   *  Properties  *
@@ -55,17 +58,10 @@ let CCCObjectConsumerMixin = Mixin( (superclass) => class extends mix(superclass
     slot.addEventListener( 'slotchange', this.onslotchange );
   }
 
-  /*******************
-  *  Event Handlers  *
-  *******************/
+  /***********
+  *  Events  *
+  ***********/
 
-  didAssignNode( event ) {
-    this.migrateNewConsumableNodes( event.detail.slot, event.detail.nodes );
-  }
-
-  /*
-    "Consume": to move any ::slotted(*) to insert before slot in shadow root.
-  */
   dispatchDidConsumeEvent( slot, node ) {
     this.dispatchDidConsumeNodeEvent( slot, node );
     if ( node.nodeType === Node.ELEMENT_NODE )
@@ -88,9 +84,17 @@ let CCCObjectConsumerMixin = Mixin( (superclass) => class extends mix(superclass
     this.dispatchEvent(did_consume_element_event);
   }
 
+  /*******************
+  *  Event Handlers  *
+  *******************/
+
+  didAssignNode( event ) {
+    this.migrateNewConsumableNodes( event.detail.slot, event.detail.nodes );
+  }
+
+
 });
 
-export { CCCObjectConsumerMixin,
-         CCCElement,
+export { CCCNodeConsumerMixin,
          LitElement, html, render,
          Mixin, mix }

@@ -1,5 +1,5 @@
 import { Selector, ClientFunction } from 'testcafe';
-import { CCCSlottedObjectMixin } from '../component/ccc-slotted-object-mixin.js';
+import { CCCSlottedObjectMixin } from '../mixin/ccc-slotted-object-mixin.js';
 import { CCCElement,
          LitElement, html, render,
          Mixin, mix } from '../component/ccc-element.js';
