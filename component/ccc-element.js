@@ -89,35 +89,58 @@ class CCCElement extends mix(LitElement).with(CCCCSSElementMixin, CCCEmbeddableE
     if ( options.relay !== undefined ) {
       if ( options.relay.target !== undefined && (this._relayState.get( name ) === undefined) ) {
         this._relayState.set( name, true );
-        let target = options.relay.target(this);
         /* If name is false, don't relay to target property. */
-        if ( target ) {
-          if ( name !== false ) {
-            let name_in_target = (options.relay.name === undefined) ?
-                                 name                               :
-                                 options.relay.name;
-            target[ name_in_target ] = this[ name ];
-          }
-          if ( options.relay.reverse !== undefined ) {
-            let reverse = options.relay.reverse(target);
-            let value = options.relay.transform             ?
-                        options.relay.transform(this[name]) :
-                        this[name];
-            for ( let index = 0 ; index < reverse.length ; ++index ) {
-              let this_element = reverse[index];
-              if ( this_element._relayState.get( name ) === undefined ) {
-                this_element._relayState.set( name, true );
-                this_element[ name ] = value;
-                this_element._relayState.delete( name );
-              }
-            }
-          }
-        }
+        if ( options.relay.target )
+          this.relayUpdateToTarget( name, oldValue, options )
         this._relayState.delete( name );
       }
     }
   }
 
+  relayUpdateToTarget( name, oldValue, options ) {
+    let target = options.relay.target(this);
+    if ( target ) {
+      if ( name !== false ) {
+        let name_in_target = (options.relay.name === undefined) ?
+                             name                               :
+                             options.relay.name;
+        if ( target instanceof NodeList       ||
+             target instanceof HTMLCollection ||
+             Array.isArray( target ) )
+          this.relayUpdateToTargetArray( name, oldValue, options, target, name_in_target );
+        else
+          this.relayUpdateToTargetObject( name, oldValue, options, target, name_in_target );
+      }
+      if ( options.relay.reverse !== undefined )
+        this.relayUpdateToReverse( name, oldValue, options, target );
+    }
+  }
+
+  relayUpdateToTargetArray( name, oldValue, options, target, name_in_target ) {
+    for ( let index = 0 ; index < target.length ; ++index ) {
+      let this_element = target[index];
+      this.relayUpdateToTargetObject( name, oldValue, options, this_element, name_in_target );
+    }
+  }
+
+  relayUpdateToTargetObject( name, oldValue, options, target, name_in_target ) {
+    target[ name_in_target ] = this[ name ];
+  }
+
+  relayUpdateToReverse( name, oldValue, options, target ) {
+    let reverse = options.relay.reverse(target);
+    let value = options.relay.transform             ?
+                options.relay.transform(this[name]) :
+                this[name];
+    for ( let index = 0 ; index < reverse.length ; ++index ) {
+      let this_element = reverse[index];
+      if ( this_element._relayState.get( name ) === undefined ) {
+        this_element._relayState.set( name, true );
+        this_element[ name ] = value;
+        this_element._relayState.delete( name );
+      }
+    }
+  }
 
   /*********
   *  Slot  *
