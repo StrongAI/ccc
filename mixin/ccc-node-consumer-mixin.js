@@ -50,38 +50,35 @@ let CCCNodeConsumerMixin = Mixin( (superclass) => class extends mix(superclass).
     slot.removeEventListener( 'slotchange', this.onslotchange );
     for ( const index in nodes ) {
       let this_node = nodes[index];
-      if ( this.shouldConsume( this_node ) ) {
-        slot.parentNode.insertBefore( this_node, slot );
-        this.dispatchDidConsumeEvent( slot, this_node );
-      }
+      if ( this.shouldConsume( this_node ) )
+        this.migrateNewConsumableNode( slot, index, nodes[index] );
     }
     slot.addEventListener( 'slotchange', this.onslotchange );
+    this.dispatchDidConsumeEvent( slot, nodes );
+  }
+
+  migrateNewConsumableNode( slot, index, node ) {
+    slot.parentNode.insertBefore( node, slot );
   }
 
   /***********
   *  Events  *
   ***********/
 
-  dispatchDidConsumeEvent( slot, node ) {
-    this.dispatchDidConsumeNodeEvent( slot, node );
-    if ( node.nodeType === Node.ELEMENT_NODE )
-      this.dispatchDidConsumeElementEvent( slot, node );
+  dispatchDidConsumeEvent( slot, nodes = { /* index: node */ } ) {
+    this.dispatchDidConsumeNodesEvent( slot, nodes );
+    let elements = this.filterElements( nodes );
+    this.dispatchDidConsumeElementsEvent( slot, elements );
   }
 
-  dispatchDidConsumeNodeEvent( slot, node ) {
-    let did_consume_node_event = new CustomEvent(
-      'did_consume_node',
-      { detail: { slot: slot, node: node } }
-    );
-    this.dispatchEvent(did_consume_node_event);
+  dispatchDidConsumeNodesEvent( slot, nodes = { /* index: node */ } ) {
+    let did_consume_nodes_event = new CustomEvent( 'did_consume_nodes', { detail: { nodes: nodes } } );
+    this.dispatchEvent( did_consume_nodes_event );
   }
 
-  dispatchDidConsumeElementEvent( slot, element ) {
-    let did_consume_element_event = new CustomEvent(
-      'did_consume_element',
-      { detail: { slot: slot, element: element } }
-    );
-    this.dispatchEvent(did_consume_element_event);
+  dispatchDidConsumeElementsEvent( slot, nodes = { /* index: node */ } ) {
+    let did_consume_elements_event = new CustomEvent( 'did_consume_elements', { detail: { nodes: nodes } } );
+    this.dispatchEvent( did_consume_elements_event );
   }
 
   /*******************

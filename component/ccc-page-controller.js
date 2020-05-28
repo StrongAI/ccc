@@ -63,30 +63,39 @@ class CCCPageController extends CCCElement {
   *  Template  *
   *************/
 
-  // get templatedPageHeader() {
-  //   return this.templatedSlot('page-header');
-  // }
-  //
-  // get templatedPageNumber() {
-  //   return html`<div class="page-number"><h3>${this.pageNumber} of ${this.totalPages}</h3></div>`;
-  // }
-  //
-  // get templatedPageContent() {
-  //   return this.templatedSlot('page-content');
-  // }
-  //
-  // get templatedPageFooter() {
-  //   return this.templatedSlot('page-footer');
-  // }
+  get templatedHeader() {
+    return this.templatedSlot('page-header');
+  }
 
-//   render() {
-//     return html`
-// ${this.templatedPageHeader}
-// ${this.templatedPageNumber}
-// ${this.templatedPageContent}
-// ${this.templatedPageFooter}
-// `;
-//   }
+  get templatedPageContent() {
+    return this.templatedSlot('default', undefined);
+  }
+
+  get templatedPreNavigationFooter() {
+    return this.templatedSlot('default', undefined);
+  }
+
+  templatedNavigationElements() {
+    return html``;
+  }
+
+  templatedNavigation() {
+    return html`<div class="navigation">${this.templatedNavigationElements()}</div>`;
+  }
+
+  get templatedPostNavigationFooter() {
+    return this.templatedSlot('page-footer');
+  }
+
+  render() {
+    return html`
+${this.templatedHeader}
+${this.templatedPageContent}
+${this.templatedPreNavigationFooter}
+${this.templatedNavigation()}
+${this.templatedPostNavigationFooter}
+`;
+  }
 
 }
 

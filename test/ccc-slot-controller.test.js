@@ -1,12 +1,12 @@
 import { Selector, ClientFunction } from 'testcafe';
-import { CCCSlottedObjectMixin } from '../mixin/ccc-slotted-object-mixin.js';
+import { CCCSlotControllerMixin } from '../mixin/ccc-slot-controller-mixin.js';
 import { CCCElement,
          LitElement, html, render,
          Mixin, mix } from '../component/ccc-element.js';
 
-fixture `CCCSlottedObjectMixin`;
+fixture `CCCSlotControllerMixin`;
 
-class CCCSlottedTestObject extends mix(CCCElement).with(CCCSlottedObjectMixin) {
+class CCCSlottedTestObject extends mix(CCCElement).with(CCCSlotControllerMixin) {
   static get tagName()  { return 'ccc-slotted-test-object'; }
 
 }

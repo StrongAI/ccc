@@ -5,11 +5,6 @@ import { Mixin, mix } from "../src/mixwith.js";
 import { CCCNodeConsumerMixin } from './ccc-node-consumer-mixin.js';
 import { CCCSlotControllerMixin } from './ccc-slot-controller-mixin.js';
 
-const STATE_HAS_UPDATED = 1;
-const STATE_UPDATE_REQUESTED = 1 << 2;
-const STATE_IS_REFLECTING_TO_ATTRIBUTE = 1 << 3;
-const STATE_IS_REFLECTING_TO_PROPERTY = 1 << 4;
-
 let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCNodeConsumerMixin, CCCSlotControllerMixin) {
 
   /***************
@@ -23,6 +18,9 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
       },
       unshadowed: {
         type:  Boolean
+      },
+      unshadowParentElement: {
+        type:  Object
       }
     };
   }
@@ -58,8 +56,8 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
 
   get unshadowParentElement() {
     if ( ! this._unshadowParentElement ) {
-      // if ( ! this.parentElement && ( ) )
-      this._unshadowParentElement = this.parentElement;
+      if ( (this.parentElement !== null) )
+        this._unshadowParentElement = this.parentElement;
     }
     return this._unshadowParentElement;
   }
@@ -72,11 +70,17 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
     return ( this.consume || this.embedded || node.embedded ) && ! node._hasBeenUnshadowed;
   }
 
+  migrateNewConsumableNode( slot, index, node ) {
+    node.unshadowParentElement;
+    super.migrateNewConsumableNode( slot, index, node );
+  }
+
   migrateNewConsumableNodes( slot, nodes = { /* index: node */ } ) {
     this.unshadowParentElement;
     super.migrateNewConsumableNodes( slot, nodes );
     if ( this.embedded )
       this.unshadow();
+    this.dispatchDidConsumeEvent( slot, nodes );
   }
 
   unshadow() {

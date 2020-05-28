@@ -126,10 +126,13 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
   *  Template  *
   *************/
 
-  templatedSlot( class_string = "default" ) {
+  templatedSlot( class_string = "default", slot_name = ( class_string=="default" ? undefined : class_string ) ) {
     if ( ! this.onslotchange )
       this.onslotchange = (event) => { this.slotDidChange(event); };
-    return html`<slot class="${class_string}" @slotchange="${this.onslotchange}"></slot>`;
+    if ( slot_name )
+      return html`<slot name="${slot_name}" class="${class_string}" @slotchange="${this.onslotchange}"></slot>`;
+    else
+      return html`<slot class="${class_string}" @slotchange="${this.onslotchange}"></slot>`;
   }
 
 });
