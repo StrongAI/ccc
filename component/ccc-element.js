@@ -78,10 +78,17 @@ class CCCElement extends mix(LitElement).with(CCCCSSElementMixin, CCCEmbeddableE
 
   }
 
+  get _relayState() {
+    if ( this.__relayState === undefined ) {
+      this.__relayState = new Map();
+    }
+    return this.__relayState;
+  }
+
   relayUpdate( name, oldValue, options ) {
     if ( options.relay !== undefined ) {
-      if ( options.relay.target !== undefined && !(this._updateState & STATE_IS_REFLECTING_TO_RELAY) ) {
-        this._updateState |= STATE_IS_REFLECTING_TO_RELAY;
+      if ( options.relay.target !== undefined && (this._relayState.get( name ) === undefined) ) {
+        this._relayState.set( name, true );
         let target = options.relay.target(this);
         /* If name is false, don't relay to target property. */
         if ( target ) {
@@ -98,15 +105,15 @@ class CCCElement extends mix(LitElement).with(CCCCSSElementMixin, CCCEmbeddableE
                         this[name];
             for ( let index = 0 ; index < reverse.length ; ++index ) {
               let this_element = reverse[index];
-              if ( !(this_element._updateState & STATE_IS_REFLECTING_TO_RELAY) ) {
-                this_element._updateState |= STATE_IS_REFLECTING_TO_RELAY; // FIX - may want to change this to be relay-instance-specific
+              if ( this_element._relayState.get( name ) === undefined ) {
+                this_element._relayState.set( name, true );
                 this_element[ name ] = value;
-                this_element._updateState &= ~STATE_IS_REFLECTING_TO_RELAY;
+                this_element._relayState.delete( name );
               }
             }
           }
         }
-        this._updateState &= ~STATE_IS_REFLECTING_TO_RELAY;
+        this._relayState.delete( name );
       }
     }
   }
