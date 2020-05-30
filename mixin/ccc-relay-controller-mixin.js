@@ -7,7 +7,6 @@ const STATE_HAS_UPDATED = 1;
 const STATE_UPDATE_REQUESTED = 1 << 2;
 const STATE_IS_REFLECTING_TO_ATTRIBUTE = 1 << 3;
 const STATE_IS_REFLECTING_TO_PROPERTY = 1 << 4;
-const STATE_IS_REFLECTING_TO_RELAY = 1 << 5;
 
 let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
 
@@ -26,6 +25,12 @@ let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
   /******************************
   *  Lit-Element RequestUpdate  *
   ******************************/
+
+  /*
+      It would be nice to use this implementation, but we have to figure out why it loops.
+      Probably STATE guards?
+      Initial attempt resulted in cycle.
+  */
 
   // requestUpdate( name, oldValue, options = this.constructor.getPropertyOptions(name) ) {
   //   let update_promise = super.requestUpdate( name, oldValue, options );
@@ -147,10 +152,10 @@ let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
               this._relayUpdateToObjectTarget( name, relay_options, target, name_in_target, value, relay_state );
           }
         }
-        if ( relay_options.chain !== undefined ) {
-          if ( relay_options.chain.name === undefined && target === this )
+        if ( relay_options.then !== undefined ) {
+          if ( relay_options.then.name === undefined && target === this )
             throw "Chain was provided without a distinct name or target, which will never run due to cycle guard.";
-          this._relayUpdate( relay_options.chain.name, relay_options.chain, relay_state );
+          this._relayUpdate( relay_options.then.name, relay_options.then, relay_state );
         }
       }
     }
