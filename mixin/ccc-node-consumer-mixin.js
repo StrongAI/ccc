@@ -50,8 +50,10 @@ let CCCNodeConsumerMixin = Mixin( (superclass) => class extends mix(superclass).
     slot.removeEventListener( 'slotchange', this.onslotchange );
     for ( const index in nodes ) {
       let this_node = nodes[index];
-      if ( this.shouldConsume( this_node ) )
+      if ( this.shouldConsume( this_node ) ) {
+        this_node._consumed = true;
         this.migrateNewConsumableNode( slot, index, nodes[index] );
+      }
     }
     slot.addEventListener( 'slotchange', this.onslotchange );
     this.dispatchDidConsumeEvent( slot, nodes );
