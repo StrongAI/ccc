@@ -27,6 +27,26 @@ let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
   *  Lit-Element RequestUpdate  *
   ******************************/
 
+  // requestUpdate( name, oldValue, options = this.constructor.getPropertyOptions(name) ) {
+  //   let update_promise = super.requestUpdate( name, oldValue, options );
+  //   let relay_promise = update_promise.then( (did_update) => {
+  //     if ( this.isConnected ) {
+  //       if ( did_update ) {
+  //         if (options.relay !== undefined )
+  //           this._relayUpdate( name, options.relay );
+  //       }
+  //       // else {
+  //       //   if ( (options.relay !== undefined) && options.relay.always )
+  //       //     this._relayUpdate( name, options.relay );
+  //       //   else
+  //       //     this._clearContinuedState();
+  //       // }
+  //     }
+  //   });
+  //   update_promise.relayPromise = relay_promise;
+  //   return update_promise;
+  // }
+
   requestUpdateInternal( name, oldValue, options ) {
     let shouldRequestUpdate = true;
     // If we have a property key, perform property update steps.
@@ -115,18 +135,23 @@ let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
                                  name                              :
                                  relay_options.name;
           let value = relay_options.transform             ?
-                      relay_options.transform(this[name]) :
+                      relay_options.transform(this[name], this) :
                       this[name];
-          if ( target instanceof NodeList       ||
-               target instanceof HTMLCollection ||
-               Array.isArray( target ) )
-            this._relayUpdateToArrayTarget( name, relay_options, target, name_in_target, value, relay_state );
-          else
-            this._relayUpdateToObjectTarget( name, relay_options, target, name_in_target, value, relay_state );
+          let meets_condition = (relay_options.condition === undefined) || relay_options.condition( value, this, target );
+          if ( meets_condition ) {
+            if ( target instanceof NodeList       ||
+                 target instanceof HTMLCollection ||
+                 Array.isArray( target ) )
+              this._relayUpdateToArrayTarget( name, relay_options, target, name_in_target, value, relay_state );
+            else
+              this._relayUpdateToObjectTarget( name, relay_options, target, name_in_target, value, relay_state );
+          }
         }
-        // if ( relay_options.chain !== undefined ) {
-        //   target._relayUpdate( name, relay_options.chain, relay_state );
-        // }
+        if ( relay_options.chain !== undefined ) {
+          if ( relay_options.chain.name === undefined && target === this )
+            throw "Chain was provided without a distinct name or target, which will never run due to cycle guard.";
+          this._relayUpdate( relay_options.chain.name, relay_options.chain, relay_state );
+        }
       }
     }
   }
