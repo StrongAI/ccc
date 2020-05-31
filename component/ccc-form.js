@@ -90,7 +90,9 @@ class CCCForm extends CCCPageController {
 
   templatedNavigationElements() {
     return html`
-${this.templatedSubmitButton()}
+  ${this.templatedBackButton()}
+  ${this.templatedNextButton()}
+  ${this.templatedSubmitButton()}
     `;
   }
 
@@ -98,18 +100,14 @@ ${this.templatedSubmitButton()}
     return html``;
   }
 
-  templatedNavigation() {
-    return html`
-<div class="navigation">
-  ${this.templatedNavigationElements()}
-</div>
-    `;
+  get templatedPageContent() {
+    return this.templatedForm;
   }
 
   get templatedFieldset() {
     return html`
 <fieldset>
-${super.render()}
+${this.templatedSlot('default', undefined)}
 ${this.templatedInputs()}
 </fieldset>
     `;
@@ -127,11 +125,10 @@ ${this.templatedInputs()}
     `;
   }
 
-  render() {
+  get templatedForm() {
     return html`
-${this.templatedCSSLinks()}
 <form name="survey" class="survey page" accept-charset="UTF-8" enctype="${this.enctype}" action="${this.action}" method="${this.method}">
-${this.templatedContainer()}
+${this.templatedFieldset}
 </form>
     `;
   }

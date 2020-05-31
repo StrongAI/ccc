@@ -308,12 +308,10 @@ class CCCPageController extends CCCElement {
   }
 
   templatedNavigationElements() {
-    // return this.templatedSlot('navigation', undefined);
     return html`
-<div class="navigation">
   ${this.templatedBackButton()}
   ${this.templatedNextButton()}
-</div>
+  ${this.templatedSlot('navigation', undefined)}
     `;
   }
 
@@ -339,6 +337,7 @@ class CCCPageController extends CCCElement {
 
   render() {
     return html`
+${this.templatedCSSLinks()}
 ${this.templatedHeader}
 ${this.templatedPageContent}
 ${this.templatedPreNavigationFooter}
