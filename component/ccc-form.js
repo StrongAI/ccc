@@ -94,10 +94,14 @@ ${this.templatedSubmitButton()}
     `;
   }
 
+  templatedInputs() {
+    return html``;
+  }
+
   templatedNavigation() {
     return html`
 <div class="navigation">
-  ${this.templatedInputs()}
+  ${this.templatedNavigationElements()}
 </div>
     `;
   }
@@ -106,6 +110,7 @@ ${this.templatedSubmitButton()}
     return html`
 <fieldset>
 ${super.render()}
+${this.templatedInputs()}
 </fieldset>
     `;
   }

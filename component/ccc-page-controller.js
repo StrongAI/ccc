@@ -40,6 +40,13 @@ class CCCPageController extends CCCElement {
   *  Methods  *
   ************/
 
+  get nextButton() {
+    if ( ! this._form ) {
+      this._form = this.unshadowRoot.querySelector('input.back');
+    }
+    return this._form;
+  }
+
   firstNumberedPage( number_variable_name = '_number',
                      increment_condition  = ( accumulator, this_element ) =>
                                             { return this_element.isNumbered; } ) {
@@ -54,6 +61,76 @@ class CCCPageController extends CCCElement {
     let this_element = this;
     while ( ! increment_condition( this[number_variable_name], this_element ) && (this_element = this_element.previousElementSibling) );
     return this_element;
+  }
+
+
+  get nextPageNumber() {
+    return this.selectedPage ? this.selectedPage.nextPageNumber : undefined;
+  }
+
+  get previousPageNumber() {
+    return this.selectedPage ? this.selectedPage.previousPageNumber : undefined;
+  }
+
+  get selectedPage() {
+    if ( ! this._selectedPage )
+      this.selectedPage = this.unshadowRoot.querySelector( '[selected]' );
+    return this._selectedPage;
+  }
+
+  set selectedPage( selected_page ) {
+    this._selectedPage = selected_page;
+    if ( selected_page ) {
+      this.nextButtonLabel = selected_page.computeNextButtonLabel();
+      this.pageNumber = this.selectedPage.pageNumber;
+      this.requestUpdate( 'selectedPageIsLastPage', undefined );
+    }
+  }
+
+  moveToPreviousPage() {
+    this.ontransitionend = (event) => {
+      this.ontransitionend = undefined;
+      if ( this.selectedPage ) {
+        this.selectedPage.selected = false;
+        this.selectedPage.invisible = true;
+        this.selectedPage.previousElementSibling.invisible = false;
+        this.selectedPage.previousElementSibling.selected = true;
+        this.selectedPage = this.selectedPage.previousElementSibling;
+      }
+      this.fadeOut = false;
+    };
+    this.fadeOut = true;
+  }
+
+  moveToNextPage() {
+    this.ontransitionend = (event) => {
+      this.ontransitionend = undefined;
+      if ( this.selectedPage ) {
+        this.selectedPage.selected = false;
+        this.selectedPage.invisible = true;
+        this.selectedPage.nextElementSibling.invisible = false;
+        this.selectedPage.nextElementSibling.selected = true;
+        this.selectedPage = this.selectedPage.nextElementSibling;
+      }
+      this.fadeOut = false;
+    };
+    this.fadeOut = true;
+  }
+
+  backWasClicked() {
+    this.moveToPreviousPage();
+  }
+
+  nextWasClicked() {
+    this.moveToNextPage();
+  }
+
+  get selectedPageNumber() {
+    return this.selectedPage ? this.selectedPage.pageNumber : undefined;
+  }
+
+  get selectedPageIsLastPage() {
+    return this.selectedPage ? this.selectedPage.isLastPage : undefined;
   }
 
   /***********************
@@ -231,7 +308,13 @@ class CCCPageController extends CCCElement {
   }
 
   templatedNavigationElements() {
-    return this.templatedSlot('navigation', undefined);
+    // return this.templatedSlot('navigation', undefined);
+    return html`
+<div class="navigation">
+  ${this.templatedBackButton()}
+  ${this.templatedNextButton()}
+</div>
+    `;
   }
 
   templatedNavigation() {
@@ -244,6 +327,14 @@ class CCCPageController extends CCCElement {
 
   get templatedPageFooter() {
     return this.templatedSlot('page-footer');
+  }
+
+  templatedBackButton() {
+    return html`<a data-page-back="${this.previousPageNumber}" class="navigation-button back" @click="${this.backWasClicked}" >Back</a>`;
+  }
+
+  templatedNextButton() {
+    return html`<a data-page-next="${this.nextPageNumber}" class="navigation-button next" @click="${this.nextWasClicked}">${this.nextButtonLabel}</a>`;
   }
 
   render() {
