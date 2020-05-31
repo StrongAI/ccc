@@ -25,6 +25,7 @@ class CCCPageController extends CCCElement {
   constructor() {
     super();
     this.totalPages = 0;
+    window.pageController = this;
   }
 
   connectedCallback() {
