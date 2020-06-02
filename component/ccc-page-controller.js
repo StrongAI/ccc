@@ -8,7 +8,8 @@ class CCCPageController extends CCCElement {
 
   static get properties () {
     return {
-      totalPages:   { type: Number }
+      totalPages:         { type: Number },
+      linearNavigation:   { type: Boolean, reflect: true, attribute: 'linear-navigation' }
     };
   };
 
@@ -29,7 +30,7 @@ class CCCPageController extends CCCElement {
   }
 
   connectedCallback() {
-    super.connectedCallback()
+    super.connectedCallback();
   }
 
   firstUpdated(...args) {
@@ -81,7 +82,8 @@ class CCCPageController extends CCCElement {
   set selectedPage( selected_page ) {
     this._selectedPage = selected_page;
     if ( selected_page ) {
-      this.nextButtonLabel = selected_page.computeNextButtonLabel();
+      if ( this.linearNavigation )
+        this.nextButtonLabel = selected_page.computeNextButtonLabel();
       this.pageNumber = this.selectedPage.pageNumber;
       this.requestUpdate( 'selectedPageIsLastPage', undefined );
     }
@@ -143,12 +145,18 @@ class CCCPageController extends CCCElement {
       this.dispatchPageAddedEvent( slot, element_detail );
     else if ( slot.name == 'page-header' )
       this.dispatchHeaderAddedEvent( slot, element_detail );
-    else if ( slot.name == 'pre-navigation-footer' )
-      this.dispatchPagePreNavigationFooterAddedEvent( slot, element_detail );
-    else if ( slot.name == 'post-navigation-footer' )
-      this.dispatchPostNavigationFooterAddedEvent( slot, element_detail );
-    else if ( slot.name == 'navigation' )
-      this.dispatchPageNavigationAddedEvent( slot, element_detail );
+    else if ( slot.name == 'pre-top-navigation-footer' )
+      this.dispatchPreTopNavigationAddedEvent( slot, element_detail );
+    else if ( slot.name == 'top-navigation' )
+      this.dispatchTopNavigationAddedEvent( slot, element_detail );
+    else if ( slot.name == 'post-top-navigation-footer' )
+      this.dispatchPostTopNavigationAddedEvent( slot, element_detail );
+    else if ( slot.name == 'pre-bottom-navigation-footer' )
+      this.dispatchPreBottomNavigationAddedEvent( slot, element_detail );
+    else if ( slot.name == 'bottom-navigation' )
+      this.dispatchBottomNavigationAddedEvent( slot, element_detail );
+    else if ( slot.name == 'post-bottom-navigation-footer' )
+      this.dispatchPostBottomNavigationAddedEvent( slot, element_detail );
     else if ( slot.name == 'page-footer' )
       this.dispatchPageFooterAddedEvent( slot, element_detail );
   }
@@ -159,12 +167,18 @@ class CCCPageController extends CCCElement {
       this.dispatchPageRemovedEvent( slot, element_detail );
     else if ( slot.name == 'page-header' )
       this.dispatchHeaderRemovedEvent( slot, element_detail );
-    else if ( slot.name == 'pre-navigation-footer' )
-      this.dispatchPagePreNavigationFooterRemovedEvent( slot, element_detail );
-    else if ( slot.name == 'post-navigation-footer' )
-      this.dispatchPostNavigationFooterRemovedEvent( slot, element_detail );
-    else if ( slot.name == 'navigation' )
-      this.dispatchPageNavigationRemovedEvent( slot, element_detail );
+    else if ( slot.name == 'pre-top-navigation' )
+      this.dispatchPreTopNavigationRemovedEvent( slot, element_detail );
+    else if ( slot.name == 'top-navigation' )
+      this.dispatchTopNavigationRemovedEvent( slot, element_detail );
+    else if ( slot.name == 'post-top-navigation' )
+      this.dispatchPostTopNavigationRemovedEvent( slot, element_detail );
+    else if ( slot.name == 'pre-bottom-navigation' )
+      this.dispatchPreBottomNavigationRemovedEvent( slot, element_detail );
+    else if ( slot.name == 'bottom-navigation' )
+      this.dispatchBottomNavigationRemovedEvent( slot, element_detail );
+    else if ( slot.name == 'post-bottom-navigation' )
+      this.dispatchPostBottomNavigationRemovedEvent( slot, element_detail );
     else if ( slot.name == 'page-footer' )
       this.dispatchPageFooterRemovedEvent( slot, element_detail );
   }
@@ -178,6 +192,11 @@ class CCCPageController extends CCCElement {
       let this_element = element_detail[ key ];
       if ( this_element.isNumbered )
         ++this.totalPages;
+      if ( this_element.selected ) {
+        this.selectedPage = this;
+      }
+      else
+        this_element.invisible = true;
     }
     let page_added_event = new CustomEvent(
       'page_added',
@@ -199,53 +218,102 @@ class CCCPageController extends CCCElement {
     this.dispatchEvent(page_removed_event);
   }
 
-  dispatchPreNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
-    let pre_navigation_added_event = new CustomEvent(
-      'pre_navigation_added',
+  dispatchPreTopNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
+    let pre_top_navigation_added_event = new CustomEvent(
+      'pre_top_navigation_added',
       { detail: { slot: slot, elements: element_detail } }
     );
-    this.dispatchEvent(pre_navigation_added_event);
+    this.dispatchEvent(pre_top_navigation_added_event);
   }
 
-  dispatchPreNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
+  dispatchPreTopNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
     let pre_navigation_removed_event = new CustomEvent(
-      'pre_navigation_removed',
+      'pre_top_navigation_removed',
       { detail: { slot: slot, elements: element_detail } }
     );
-    this.dispatchEvent(pre_navigation_removed_event);
+    this.dispatchEvent(pre_top_navigation_removed_event);
   }
 
-  dispatchNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
-    let navigation_added_event = new CustomEvent(
-      'navigation_added',
+  dispatchTopNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
+    let top_navigation_added_event = new CustomEvent(
+      'top_navigation_added',
       { detail: { slot: slot, elements: element_detail } }
     );
-    this.dispatchEvent(navigation_added_event);
+    this.dispatchEvent(top_navigation_added_event);
   }
 
-  dispatchNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
-    let navigation_removed_event = new CustomEvent(
-      'navigation_removed',
+  dispatchTopNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
+    let top_navigation_removed_event = new CustomEvent(
+      'top_navigation_removed',
       { detail: { slot: slot, elements: element_detail } }
     );
-    this.dispatchEvent(navigation_removed_event);
+    this.dispatchEvent(top_navigation_removed_event);
   }
 
-  dispatchPostNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
+  dispatchPostTopNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
     let post_navigation_added_event = new CustomEvent(
-      'post_navigation_added',
+      'post_top_navigation_added',
       { detail: { slot: slot, elements: element_detail } }
     );
-    this.dispatchEvent(post_navigation_added_event);
+    this.dispatchEvent(post_top_navigation_added_event);
   }
 
-  dispatchPostNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
+  dispatchPostTopNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
     let post_navigation_removed_event = new CustomEvent(
-      'post_navigation_removed',
+      'post_top_navigation_removed',
       { detail: { slot: slot, elements: element_detail } }
     );
-    this.dispatchEvent(post_navigation_removed_event);
+    this.dispatchEvent(post_top_navigation_removed_event);
   }
+
+  dispatchPreBottomNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
+    let pre_bottom_navigation_added_event = new CustomEvent(
+      'pre_bottom_navigation_added',
+      { detail: { slot: slot, elements: element_detail } }
+    );
+    this.dispatchEvent(pre_bottom_navigation_added_event);
+  }
+
+  dispatchPreBottomNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
+    let pre_navigation_removed_event = new CustomEvent(
+      'pre_bottom_navigation_removed',
+      { detail: { slot: slot, elements: element_detail } }
+    );
+    this.dispatchEvent(pre_bottom_navigation_removed_event);
+  }
+
+  dispatchBottomNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
+    let navigation_added_event = new CustomEvent(
+      'bottom_navigation_added',
+      { detail: { slot: slot, elements: element_detail } }
+    );
+    this.dispatchEvent(bottom_navigation_added_event);
+  }
+
+  dispatchBottomNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
+    let navigation_removed_event = new CustomEvent(
+      'bottom_navigation_removed',
+      { detail: { slot: slot, elements: element_detail } }
+    );
+    this.dispatchEvent(bottom_navigation_removed_event);
+  }
+
+  dispatchPostBottomNavigationAddedEvent( slot, element_detail = { /* index: node */ } ) {
+    let post_navigation_added_event = new CustomEvent(
+      'post_bottom_navigation_added',
+      { detail: { slot: slot, elements: element_detail } }
+    );
+    this.dispatchEvent(post_bottom_navigation_added_event);
+  }
+
+  dispatchPostBottomNavigationRemovedEvent( slot, element_detail = { /* index: node */ } ) {
+    let post_navigation_removed_event = new CustomEvent(
+      'post_bottom_navigation_removed',
+      { detail: { slot: slot, elements: element_detail } }
+    );
+    this.dispatchEvent(post_bottom_navigation_removed_event);
+  }
+
 
   /*****************
   *  State Events  *
@@ -292,6 +360,54 @@ class CCCPageController extends CCCElement {
   }
 
   /*************
+  *  Elements  *
+  *************/
+
+  get topNavigation() {
+    if ( ! this._topNavigation )
+      this._topNavigation = this.unshadowRoot.querySelector('div.top-navigation');
+    return this._topNavigation;
+  }
+
+  get topNavigationSlot() {
+    if ( ! this._topNavigationSlot )
+      this._topNavigationSlot = this.unshadowRoot.querySelector('slot.top-navigation');
+    return this._topNavigationSlot;
+  }
+
+  get bottomNavigation() {
+    if ( ! this._bottomNavigation )
+      this._bottomNavigation = this.unshadowRoot.querySelector('div.bottom-navigation');
+    return this._bottomNavigation;
+  }
+
+  /*********************
+  *  Dyanmic Template  *
+  *********************/
+
+  createToolButton( tool ) {
+    let label = tool.label ? tool.label : tool.constructor.name;
+    let identifier = tool.identifier ? tool.identifier : tool.tagName;
+
+    let fragment = document.createDocumentFragment();
+    let template = this.templatedToolButton( tool, label, identifier );
+    render( template, fragment, { eventContext: this } );
+    return fragment.firstElementChild;
+  }
+
+  toolButtonClickHandler( event ) {
+
+  }
+
+  templatedToolButton( tool, label, identifier ) {
+    return html`<a href slot="top-navigation" class="navigation-button ${identifier}" @click="${(event) => {
+      event.preventDefault();
+      tool.invisible = false;
+      tool.selected = true;
+    }}" >${label}</a>`;
+  }
+
+  /*************
   *  Template  *
   *************/
 
@@ -303,28 +419,49 @@ class CCCPageController extends CCCElement {
     return this.templatedSlot('default', undefined);
   }
 
-  get templatedPreNavigationFooter() {
-    return this.templatedSlot('pre-navigation-footer', undefined);
+  get templatedPreTopNavigation() {
+    return this.templatedSlot('pre-top-navigation');
   }
 
-  templatedNavigationElements() {
-    return html`
-  ${this.templatedBackButton()}
-  ${this.templatedNextButton()}
-  ${this.templatedSlot('navigation', undefined)}
-    `;
+  get templatedTopNavigation() {
+    return html`<div class="top-navigation navigation">${this.templatedSlot('top-navigation')}</div>`;
   }
 
-  templatedNavigation() {
-    return html`<div class="navigation">${this.templatedNavigationElements()}</div>`;
+  get templatedPostTopNavigation() {
+    return this.templatedSlot('post-top-navigation');
   }
 
-  get templatedPostNavigationFooter() {
-    return this.templatedSlot('post-navigation-footer', undefined);
+  get templatedPreBottomNavigation() {
+    return this.templatedSlot('pre-bottom-navigation');
+  }
+
+  get templatedBottomNavigation() {
+    // return this.templatedSlot('bottom-navigation');
+    return html`<div class="bottom-navigation navigation">${this.templatedNavigationElements}</div>`;
+  }
+
+  get templatedPostBottomNavigation() {
+    return this.templatedSlot('post-bottom-navigation');
+  }
+
+  get templatedNavigationElements() {
+    return this.linearNavigation ?
+html`
+${this.templatedLinearNavigation}
+${this.templatedSlot('navigation', undefined)}
+` :
+html`${this.templatedSlot('navigation', undefined)}`;
   }
 
   get templatedPageFooter() {
     return this.templatedSlot('page-footer');
+  }
+
+  get templatedLinearNavigation() {
+    return html`
+${this.templatedBackButton()}
+${this.templatedNextButton()}
+`;
   }
 
   templatedBackButton() {
@@ -339,10 +476,13 @@ class CCCPageController extends CCCElement {
     return html`
 ${this.templatedCSSLinks()}
 ${this.templatedHeader}
+${this.templatedPreTopNavigation}
+${this.templatedTopNavigation}
+${this.templatedPostTopNavigation}
 ${this.templatedPageContent}
-${this.templatedPreNavigationFooter}
-${this.templatedNavigation()}
-${this.templatedPostNavigationFooter}
+${this.templatedPreBottomNavigation}
+${this.templatedBottomNavigation}
+${this.templatedPostBottomNavigation}
 ${this.templatedPageFooter}
 `;
   }

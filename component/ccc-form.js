@@ -88,12 +88,11 @@ class CCCForm extends CCCPageController {
     return html`<input type="submit" name="submit-button" class="navigation-button submit" value="Submit" @click="${this.submit}">`;
   }
 
-  templatedNavigationElements() {
+  get templatedNavigationElements() {
     return html`
-  ${this.templatedBackButton()}
-  ${this.templatedNextButton()}
-  ${this.templatedSubmitButton()}
-    `;
+${super.templatedNavigationElements}
+${this.templatedSubmitButton()}
+`;
   }
 
   templatedInputs() {

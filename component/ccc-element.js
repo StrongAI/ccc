@@ -25,6 +25,13 @@ class CCCElement extends mix(LitElement).with( CCCCSSElementMixin,
     return CCCElement;
   }
 
+  static get properties () {
+    return {
+      label:         { type: String, reflect: true },
+      identifier:    { type: String, reflect: true }
+    };
+  };
+
   /*****************
   *  Constructors  *
   *****************/
