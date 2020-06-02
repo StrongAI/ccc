@@ -82,7 +82,7 @@ class CCCPageController extends CCCElement {
   set selectedPage( selected_page ) {
     this._selectedPage = selected_page;
     if ( selected_page ) {
-      if ( this.linearNavigation )
+      if ( this.linearNavigation && selected_page.computeNextButtonLabel )
         this.nextButtonLabel = selected_page.computeNextButtonLabel();
       this.pageNumber = this.selectedPage.pageNumber;
       this.requestUpdate( 'selectedPageIsLastPage', undefined );
@@ -402,7 +402,6 @@ class CCCPageController extends CCCElement {
   templatedToolButton( tool, label, identifier ) {
     return html`<a href slot="top-navigation" class="navigation-button ${identifier}" @click="${(event) => {
       event.preventDefault();
-      tool.invisible = false;
       tool.selected = true;
     }}" >${label}</a>`;
   }

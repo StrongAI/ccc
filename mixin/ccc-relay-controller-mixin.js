@@ -75,10 +75,10 @@ let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
         }
 
         if ( this.isConnected && options.relay !== undefined )
-          this._relayUpdate( name, options.relay );
+          this._relayUpdateStart( name, options.relay );
       } else {
         if ( (options.relay !== undefined) && options.relay.always )
-          this._relayUpdate( name, options.relay );
+          this._relayUpdateStart( name, options.relay );
         else
           this._clearContinuedState();
         // Abort the request if the property should not be considered changed.
@@ -124,40 +124,53 @@ let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
     delete this.__relayState;
   }
 
-  _relayUpdate( name, relay_options, relay_state = this._continuedOrNewState, instance_relay_state = this._instanceRelayState( relay_state ) ) {
-    if ( instance_relay_state.get( name ) === undefined ) {
-      this._relayUpdateInternal( name, relay_options, relay_state, instance_relay_state )
+  _relayUpdateStart( name, relay_options ) {
+    if ( relay_options.target === undefined )
+      throw "Cannot relay without a distinct target.";
+    let target = relay_options.target(this);
+    this._relayUpdate( name, target, relay_options );
+
+  }
+
+  _relayUpdate( name, target, relay_options, relay_state = this._continuedOrNewState, instance_relay_state = this._instanceRelayState( relay_state ) ) {
+    let instance_relay_targets = instance_relay_state.get( name );
+    let should_relay = false;
+    if ( instance_relay_targets === undefined ) {
+      instance_relay_targets = new Map;
+      instance_relay_state.set( name, instance_relay_targets );
+    }
+    if ( instance_relay_targets.get( target ) === undefined ) {
+      instance_relay_targets.set( target, true );
+      this._relayUpdateInternal( name, target, relay_options, relay_state, instance_relay_state );
     }
   }
 
-  _relayUpdateInternal( name, relay_options, relay_state = this._continuedOrNewState, instance_relay_state = this._instanceRelayState( relay_state ) ) {
-    instance_relay_state.set( name, true );
-    if ( relay_options.target !== undefined ) {
-      let target = relay_options.target(this);
-      if ( target ) {
-        if ( relay_options.name !== false ) {
-          let name_in_target = ( relay_options.name === undefined) ?
-                                 name                              :
-                                 relay_options.name;
-          let value = relay_options.transform             ?
-                      relay_options.transform(this[name], this) :
-                      this[name];
-          let meets_condition = (relay_options.condition === undefined) || relay_options.condition( value, this, target );
-          if ( meets_condition ) {
-            if ( target instanceof NodeList       ||
-                 target instanceof HTMLCollection ||
-                 Array.isArray( target ) )
-              this._relayUpdateToArrayTarget( name, relay_options, target, name_in_target, value, relay_state );
-            else
-              this._relayUpdateToObjectTarget( name, relay_options, target, name_in_target, value, relay_state );
-          }
-        }
-        if ( relay_options.then !== undefined ) {
-          if ( relay_options.then.name === undefined && target === this )
-            throw "Chain was provided without a distinct name or target, which will never run due to cycle guard.";
-          this._relayUpdate( relay_options.then.name, relay_options.then, relay_state );
-        }
-      }
+  _relayUpdateInternal( name, target, relay_options, relay_state = this._continuedOrNewState, instance_relay_state = this._instanceRelayState( relay_state ) ) {
+    if ( relay_options.name !== false ) {
+      let name_in_target = ( relay_options.name === undefined) ?
+                             name                              :
+                             relay_options.name;
+      let meets_condition = (relay_options.condition === undefined) || relay_options.condition( this[name], this, target );
+      if ( ! meets_condition )
+        return;
+      let value = relay_options.transform             ?
+                  relay_options.transform(this[name], this) :
+                  this[name];
+      if ( target instanceof NodeList       ||
+           target instanceof HTMLCollection ||
+           Array.isArray( target ) )
+        this._relayUpdateToArrayTarget( name, relay_options, target, name_in_target, value, relay_state );
+      else
+        this._relayUpdateToObjectTarget( name, relay_options, target, name_in_target, value, relay_state );
+    }
+    if ( relay_options.then !== undefined ) {
+      let next_target = relay_options.then.target(this);
+
+
+      // if ( relay_options.then.name === undefined && target === this )
+      //   throw "Chain was provided without a distinct name or target, which will never run due to cycle guard.";
+
+      this._relayUpdate( relay_options.then.name, next_target, relay_options.then, relay_state );
     }
   }
 

@@ -27,6 +27,26 @@ class CCCElement extends mix(LitElement).with( CCCCSSElementMixin,
 
   static get properties () {
     return {
+      selected:    { type: Boolean,
+                     reflect: true,
+                     relay: {
+                       target:     (self)   => { return self; },
+                       name:       'invisible',
+                       transform:  (value)  => { return !value; },
+                       then: {
+                         target:     (self)   => { return self.unshadowParentElement.children; },
+                         name:       'selected',
+                         condition:  (value)  => { return value ? true : false; },
+                         transform:  (value)  => { return false; },
+                       }
+                     }  },
+      invisible:   { type: Boolean,
+                     reflect: true,
+                     relay: {
+                       target:     (self)   => { return self.unshadowParentElement.children; },
+                       condition:  (value)  => { return value ? false : true; },
+                       transform:  (value)  => { return true; },
+                     } },
       label:         { type: String, reflect: true },
       identifier:    { type: String, reflect: true }
     };
