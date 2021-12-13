@@ -1,6 +1,6 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 import { CCCElement } from './ccc-element.js';
 
@@ -64,7 +64,7 @@ class CCCForm extends CCCPageController {
     return this._container;
   }
 
-  submit() {
+  submit(event) {
     this.form.submit();
   }
 
@@ -85,7 +85,7 @@ class CCCForm extends CCCPageController {
   }
 
   templatedSubmitButton() {
-    return html`<input type="submit" name="submit-button" class="navigation-button submit" value="Submit" @click="${this.submit}">`;
+    return html`<input type="submit" id="submit" name="submit-button" class="navigation-button submit" value="Submit" @click="${this.submit}">`;
   }
 
   get templatedNavigationElements() {

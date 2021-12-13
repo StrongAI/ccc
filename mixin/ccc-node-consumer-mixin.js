@@ -1,6 +1,6 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 import { CCCSlotControllerMixin } from '../mixin/ccc-slot-controller-mixin.js';
 
@@ -16,7 +16,8 @@ let CCCNodeConsumerMixin = Mixin( (superclass) => class extends mix(superclass).
   static get properties () {
     return {
       consume: {
-        type:  Boolean
+        type:  Boolean,
+        reflect: true
       }
     };
   }

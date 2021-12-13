@@ -1,6 +1,6 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 import { CCCNodeConsumerMixin } from './ccc-node-consumer-mixin.js';
 import { CCCSlotControllerMixin } from './ccc-slot-controller-mixin.js';
@@ -14,13 +14,16 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
   static get properties () {
     return {
       embedded: {
-        type:  Boolean
+        type:  Boolean,
+        reflect: true
       },
       unshadowed: {
-        type:  Boolean
+        type:  Boolean,
+        reflect: true
       },
       unshadowParentElement: {
-        type:  Object
+        type:  Object,
+        reflect: true
       }
     };
   }
@@ -33,6 +36,7 @@ let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(supercl
     super();
     this.embedded = false;
     this.unshadowed = false;
+    this.unshadowParentElement = false;
   }
 
   connectedCallback() {

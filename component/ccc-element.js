@@ -1,6 +1,6 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 import { CCCEmbeddableElementMixin } from '../mixin/ccc-embeddable-element-mixin.js';
 import { CCCNumberedElementMixin } from '../mixin/ccc-numbered-element-mixin.js';
@@ -34,7 +34,7 @@ class CCCElement extends mix(LitElement).with( CCCCSSElementMixin,
                        name:       'invisible',
                        transform:  (value)  => { return !value; },
                        then: {
-                         target:     (self)   => { return self.unshadowParentElement.children; },
+                         target:     (self)   => { return self.unshadowParentElement ? self.unshadowParentElement.children : undefined; },
                          name:       'selected',
                          condition:  (value)  => { return value ? true : false; },
                          transform:  (value)  => { return false; },
@@ -43,7 +43,7 @@ class CCCElement extends mix(LitElement).with( CCCCSSElementMixin,
       invisible:   { type: Boolean,
                      reflect: true,
                      relay: {
-                       target:     (self)   => { return self.unshadowParentElement.children; },
+                       target:     (self)   => { return self.unshadowParentElement ? self.unshadowParentElement.children : undefined; },
                        condition:  (value)  => { return value ? false : true; },
                        transform:  (value)  => { return true; },
                      } },

@@ -1,6 +1,6 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 import { CCCElement } from './ccc-element.js';
 
@@ -8,6 +8,9 @@ class CCCPageController extends CCCElement {
 
   static get properties () {
     return {
+      userAgent:          { type: String,  reflect: true, attribute: 'data-browser' },
+      isFirstPage:        { type: Boolean, reflect: true, attribute: 'first-page' },
+      isLastPage:         { type: Boolean, reflect: true, attribute: 'last-page' },
       totalPages:         { type: Number },
       linearNavigation:   { type: Boolean, reflect: true, attribute: 'linear-navigation' }
     };
@@ -35,6 +38,8 @@ class CCCPageController extends CCCElement {
 
   firstUpdated(...args) {
     super.firstUpdated(...args);
+    document.documentElement.setAttribute("data-browser", navigator.userAgent);
+    this.userAgent = navigator.userAgent;
   }
 
   /************
@@ -85,6 +90,8 @@ class CCCPageController extends CCCElement {
       if ( this.linearNavigation && selected_page.computeNextButtonLabel )
         this.nextButtonLabel = selected_page.computeNextButtonLabel();
       this.pageNumber = this.selectedPage.pageNumber;
+      this.isFirstPage = this._selectedPage.previousElementSibling === null;
+      this.isLastPage = this._selectedPage.nextElementSibling === null;
       this.requestUpdate( 'selectedPageIsLastPage', undefined );
     }
   }
@@ -193,7 +200,7 @@ class CCCPageController extends CCCElement {
       if ( this_element.isNumbered )
         ++this.totalPages;
       if ( this_element.selected ) {
-        this.selectedPage = this;
+        this.selectedPage = this_element;
       }
       else
         this_element.invisible = true;

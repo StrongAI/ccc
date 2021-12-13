@@ -1,13 +1,25 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 
 let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
 
+  static get properties () {
+    return {
+      renderSlot: {
+        type:  Boolean
+      }
+    };
+  }
   /************
   *  Methods  *
   ************/
+
+  constructor() {
+    super();
+    this.renderSlot = true;
+  }
 
   /********************
   *  CSS Style Links  *
@@ -61,7 +73,7 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
 
   templatedDefaultStylesheets() {
     if ( ! this._templatedDefaultStylesheets )
-      this._templatedDefaultStylesheets = html`<link rel="stylesheet" class="default" href="/assets/css/default.css"></link>`;
+      this._templatedDefaultStylesheets = html`<link rel="stylesheet" class="default" href="/compiled_css/default.css"></link>`;
     return this._templatedDefaultStylesheets;
   }
 

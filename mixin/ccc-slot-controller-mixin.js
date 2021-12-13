@@ -1,6 +1,6 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 
 let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
@@ -12,7 +12,8 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
   static get properties () {
     return {
       consume: {
-        type:  Boolean
+        type:  Boolean,
+        reflect: true
       }
     };
   }
@@ -133,6 +134,19 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
       return html`<slot name="${slot_name}" class="${class_string}" @slotchange="${this.onslotchange}"></slot>`;
     else
       return html`<slot class="${class_string}" @slotchange="${this.onslotchange}"></slot>`;
+  }
+
+  templateDefaultSlot() {
+    if ( ! this._templateDefaultSlot )
+      this._templateDefaultSlot = this.renderSlot ? this.templatedSlot() : html``;
+    return this._templateDefaultSlot;
+  }
+
+  render() {
+    return html`
+${this.templatedCSSLinks()}
+${this.templateDefaultSlot()}
+`
   }
 
 });

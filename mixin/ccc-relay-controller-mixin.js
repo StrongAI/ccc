@@ -1,6 +1,6 @@
 
-import { LitElement, html } from '../../lit-element/lit-element.js';
-import { render } from '../../lit-html/lit-html.js';
+import { LitElement, html } from 'lit-element/lit-element.js';
+import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 
 const STATE_HAS_UPDATED = 1;
@@ -133,15 +133,17 @@ let CCCRelayControllerMixin = Mixin( (superclass) => class extends superclass {
   }
 
   _relayUpdate( name, target, relay_options, relay_state = this._continuedOrNewState, instance_relay_state = this._instanceRelayState( relay_state ) ) {
-    let instance_relay_targets = instance_relay_state.get( name );
-    let should_relay = false;
-    if ( instance_relay_targets === undefined ) {
-      instance_relay_targets = new Map;
-      instance_relay_state.set( name, instance_relay_targets );
-    }
-    if ( instance_relay_targets.get( target ) === undefined ) {
-      instance_relay_targets.set( target, true );
-      this._relayUpdateInternal( name, target, relay_options, relay_state, instance_relay_state );
+    if ( target ) {
+      let instance_relay_targets = instance_relay_state.get( name );
+      let should_relay = false;
+      if ( instance_relay_targets === undefined ) {
+        instance_relay_targets = new Map;
+        instance_relay_state.set( name, instance_relay_targets );
+      }
+      if ( instance_relay_targets.get( target ) === undefined ) {
+        instance_relay_targets.set( target, true );
+        this._relayUpdateInternal( name, target, relay_options, relay_state, instance_relay_state );
+      }
     }
   }
 
