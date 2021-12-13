@@ -68,21 +68,39 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
   */
 
   /*************
+  *  CSS Path  *
+  *************/
+
+  cssPath( link_css_id ) {
+    return '/compiled_css/' + link_css_id + '.css';
+  }
+
+  elementCSSPath( tag, embedded = false ) {
+    return '/compiled_css/' + tag + '/' + tag + '.' + (embedded?'embedded':'host') + '.css';
+  }
+
+  /*************
   *  Template  *
   *************/
 
+  templatedStylesheet( link_css_id="default", link_href=this.cssPath(link_css_id) ) {
+    return html`<link rel="stylesheet" id="${link_css_id}" href="${link_href}"></link>`;
+  }
+
+  templatedElementStylesheet( tag, embedded = false, link_href=this.elementCSSPath(tag, embedded) ) {
+    return this.templatedStylesheet( tag, link_href );
+  }
+
   templatedDefaultStylesheets() {
     if ( ! this._templatedDefaultStylesheets )
-      this._templatedDefaultStylesheets = html`<link rel="stylesheet" class="default" href="/compiled_css/default.css"></link>`;
+      this._templatedDefaultStylesheets = this.templatedStylesheet('default');
     return this._templatedDefaultStylesheets;
   }
 
   templatedElementStylesheets() {
     if ( ! this._templatedElementStylesheets )
       this._templatedElementStylesheets = html`
-${this.cssInfo.map( this_css_info => html`
-  <link rel="stylesheet" id="${this_css_info.tag}" href="${this_css_info.href}"></link>
-`)}`;
+${this.cssInfo.map( this_css_info => this.templatedElementStylesheet(this_css_info.tag) )}`;
     return this._templatedElementStylesheets;
   }
 
