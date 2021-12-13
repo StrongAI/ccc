@@ -14,6 +14,9 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
       consume: {
         type:  Boolean,
         reflect: true
+      },
+      renderSlot: {
+        type:  Boolean
       }
     };
   }
@@ -21,6 +24,11 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
   /*****************
   *  Constructors  *
   *****************/
+
+  constructor() {
+    super();
+    this.renderSlot = true;
+  }
 
   connectedCallback() {
     super.connectedCallback()

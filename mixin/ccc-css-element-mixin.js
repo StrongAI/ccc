@@ -5,21 +5,9 @@ import { Mixin, mix } from "../src/mixwith.js";
 
 let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
 
-  static get properties () {
-    return {
-      renderSlot: {
-        type:  Boolean
-      }
-    };
-  }
   /************
   *  Methods  *
   ************/
-
-  constructor() {
-    super();
-    this.renderSlot = true;
-  }
 
   /********************
   *  CSS Style Links  *
@@ -32,7 +20,10 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
       let this_class = this;
       do {
         if ( this_class.cssHref( embedded ) ) {
-          this._cssInfo.unshift({ tag: this_class.tagName, href: this_class.cssHref( embedded )});
+          this._cssInfo.unshift({
+            tag: this_class.tagName,
+            link: this_class.templatedElementStylesheet( this_class.tagName, embedded )
+          });
         }
       } while ( (this_class = Object.getPrototypeOf(this_class.prototype).constructor) &&
                 this_class != this.cssTerminatingClass );
@@ -42,11 +33,7 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
 
   static cssHref( embedded ) {
     if ( ! this.hasOwnProperty('_cssHref') ) {
-      this._cssHref = [
-        '/compiled_css',
-        this.tagName,
-        this.tagName + (embedded?'.embedded':'.host')+ '.css'
-      ].join('/')
+      this._cssHref = this.elementCSSPath( this.tagName, embedded );
     }
     return this._cssHref;
   }
@@ -71,11 +58,11 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
   *  CSS Path  *
   *************/
 
-  cssPath( link_css_id ) {
+  static cssPath( link_css_id ) {
     return '/compiled_css/' + link_css_id + '.css';
   }
 
-  elementCSSPath( tag, embedded = false ) {
+  static elementCSSPath( tag, embedded = false ) {
     return '/compiled_css/' + tag + '/' + tag + '.' + (embedded?'embedded':'host') + '.css';
   }
 
@@ -83,24 +70,24 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
   *  Template  *
   *************/
 
-  templatedStylesheet( link_css_id="default", link_href=this.cssPath(link_css_id) ) {
+  static templatedStylesheet( link_css_id="default", link_href=this.cssPath(link_css_id) ) {
     return html`<link rel="stylesheet" id="${link_css_id}" href="${link_href}"></link>`;
   }
 
-  templatedElementStylesheet( tag, embedded = false, link_href=this.elementCSSPath(tag, embedded) ) {
+  static templatedElementStylesheet( tag, embedded = false, link_href=this.elementCSSPath(tag, embedded) ) {
     return this.templatedStylesheet( tag, link_href );
   }
 
   templatedDefaultStylesheets() {
     if ( ! this._templatedDefaultStylesheets )
-      this._templatedDefaultStylesheets = this.templatedStylesheet('default');
+      this._templatedDefaultStylesheets = this.constructor.templatedStylesheet('default');
     return this._templatedDefaultStylesheets;
   }
 
   templatedElementStylesheets() {
     if ( ! this._templatedElementStylesheets )
       this._templatedElementStylesheets = html`
-${this.cssInfo.map( this_css_info => this.templatedElementStylesheet(this_css_info.tag) )}`;
+${this.cssInfo.map( this_css_info => this_css_info.link )}`;
     return this._templatedElementStylesheets;
   }
 
