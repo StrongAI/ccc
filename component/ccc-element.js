@@ -7,8 +7,8 @@ import { CCCNumberedElementMixin } from '../mixin/ccc-numbered-element-mixin.js'
 import { CCCCSSElementMixin } from '../mixin/ccc-css-element-mixin.js';
 import { CCCRelayControllerMixin } from '../mixin/ccc-relay-controller-mixin.js';
 
-class CCCElement extends mix(LitElement).with( CCCCSSElementMixin,
-                                               CCCEmbeddableElementMixin,
+class CCCElement extends mix(LitElement).with( CCCEmbeddableElementMixin,
+                                               CCCCSSElementMixin,
                                                CCCNumberedElementMixin,
                                                CCCRelayControllerMixin) {
 

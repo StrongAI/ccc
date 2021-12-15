@@ -96,7 +96,7 @@ ${this.templatedSubmitButton()}
   }
 
   templatedInputs() {
-    return html``;
+    return undefined;
   }
 
   get templatedPageContent() {

@@ -5,7 +5,7 @@ import { Mixin, mix } from "../src/mixwith.js";
 import { CCCNodeConsumerMixin } from './ccc-node-consumer-mixin.js';
 import { CCCSlotControllerMixin } from './ccc-slot-controller-mixin.js';
 
-let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCNodeConsumerMixin, CCCSlotControllerMixin) {
+let CCCEmbeddableElementMixin = Mixin( (superclass) => class extends mix(superclass).with(CCCNodeConsumerMixin) {
 
   /***************
   *  Properties  *

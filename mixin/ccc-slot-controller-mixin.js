@@ -17,6 +17,9 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
       },
       renderSlot: {
         type:  Boolean
+      },
+      embeddedElements: {
+        type:  Object
       }
     };
   }
@@ -28,6 +31,7 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
   constructor() {
     super();
     this.renderSlot = true;
+    this.embeddedElements = new Map;
   }
 
   connectedCallback() {
@@ -36,6 +40,22 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
 
   firstUpdated(...args) {
     super.firstUpdated(...args);
+  }
+
+  /**********************
+  *  Embedded Elements  *
+  **********************/
+
+  registerTagNameForEmbeddedElement( element ) {
+    if ( element.embedded ) {
+      this.embeddedElements.set( element.tagName, true );
+      return true;
+    }
+    return false;
+  }
+
+  unregisterTagNameForEmbeddedElement( tag_name ) {
+    this.embeddedElements.delete( tag_name );
   }
 
   /*******************
@@ -102,6 +122,10 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
   }
 
   dispatchDidAssignElementEvent( slot, element_detail = { /* index: node */ } ) {
+    let indexes = Object.getOwnPropertyNames( element_detail );
+    for ( let this_index of indexes )
+      this.registerTagNameForEmbeddedElement( element_detail[ this_index ] );
+
     let did_assign_element_event = new CustomEvent(
       'did_assign_element',
       { detail: { slot: slot, elements: element_detail } }
@@ -146,15 +170,12 @@ let CCCSlotControllerMixin = Mixin( (superclass) => class extends superclass {
 
   templateDefaultSlot() {
     if ( ! this._templateDefaultSlot )
-      this._templateDefaultSlot = this.renderSlot ? this.templatedSlot() : html``;
+      this._templateDefaultSlot = this.renderSlot ? this.templatedSlot() : undefined;
     return this._templateDefaultSlot;
   }
 
   render() {
-    return html`
-${this.templatedCSSLinks()}
-${this.templateDefaultSlot()}
-`
+    return this.templateDefaultSlot();
   }
 
 });

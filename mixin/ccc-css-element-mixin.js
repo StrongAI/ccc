@@ -2,12 +2,30 @@
 import { LitElement, html } from 'lit-element/lit-element.js';
 import { render } from 'lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
+import { CCCEmbeddableElementMixin } from '../mixin/ccc-embeddable-element-mixin.js';
 
 let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
+
+  /***************
+  *  Properties  *
+  ***************/
+
+  static get properties () {
+    return {
+      cssEmbeddedInfo: {
+        type:  Array
+      }
+    };
+  }
 
   /************
   *  Methods  *
   ************/
+
+  constructor() {
+    super();
+    this.cssEmbeddedInfo = [];
+  }
 
   /********************
   *  CSS Style Links  *
@@ -38,12 +56,28 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
     return this._cssHref;
   }
 
-  get cssInfo () {
+  get cssInfo() {
     return this.constructor.cssInfo( this.embedded );
   }
 
-  get cssHref () {
+  get cssHref() {
     return this.constructor.cssHref( this.embedded );
+  }
+
+  /**********************
+  *  Embedded Elements  *
+  **********************/
+
+  registerTagNameForEmbeddedElement( element ) {
+    if ( element.embedded && ! this.embeddedElements.has(element.tagName) ) {
+      let element_css_links = element.cssInfo.map( this_css_info => this_css_info.link );
+      this.embeddedElements.set( element.tagName, element_css_links );
+      delete this._templatedCSSLinks;
+      delete this._templatedEmbeddedElementStylesheets;
+      this.requestUpdate();
+      return true;
+    }
+    return false;
   }
 
   /***********
@@ -86,22 +120,29 @@ let CCCCSSElementMixin = Mixin( (superclass) => class extends superclass {
 
   templatedElementStylesheets() {
     if ( ! this._templatedElementStylesheets )
-      this._templatedElementStylesheets = html`
-${this.cssInfo.map( this_css_info => this_css_info.link )}`;
+      this._templatedElementStylesheets = html`${this.cssInfo.map( this_css_info => this_css_info.link )}`;
     return this._templatedElementStylesheets;
+  }
+
+  templatedEmbeddedElementStylesheets() {
+    if ( ! this._templatedEmbeddedElementStylesheets )
+      this._templatedEmbeddedElementStylesheets = html`${this.embeddedElements.values()}`;
+    return this._templatedEmbeddedElementStylesheets;
   }
 
   templatedCSSLinks() {
     if ( ! this._templatedCSSLinks )
       this._templatedCSSLinks = this.embedded ?
-html``                                        :
+undefined                                        :
 html`${this.templatedDefaultStylesheets()}
+${this.templatedEmbeddedElementStylesheets()}
 ${this.templatedElementStylesheets()}`;
     return this._templatedCSSLinks;
   }
 
   render() {
-    return this.templatedCSSLinks();
+    return html`${this.templatedCSSLinks()}
+${super.render()}`;
   }
 
 });

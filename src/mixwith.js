@@ -93,6 +93,8 @@ class MixinBuilder {
   }
 
   with() {
-    return Array.from(arguments).reduce((c, m) => m(c), this.superclass);
+    let explicit = Array.from(arguments);
+    let reduced = explicit.reduce((previous, current) => current(previous), this.superclass);
+    return reduced;
   }
 }
