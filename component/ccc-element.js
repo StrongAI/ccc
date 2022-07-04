@@ -1,6 +1,6 @@
 
-import { LitElement, html } from 'lit-element/lit-element.js';
-import { render } from 'lit-html/lit-html.js';
+import { LitElement } from '/node_modules/lit-element/lit-element.js';
+import { render, html } from '/node_modules/lit-html/lit-html.js';
 import { Mixin, mix } from "../src/mixwith.js";
 import { CCCEmbeddableElementMixin } from '../mixin/ccc-embeddable-element-mixin.js';
 import { CCCNumberedElementMixin } from '../mixin/ccc-numbered-element-mixin.js';
